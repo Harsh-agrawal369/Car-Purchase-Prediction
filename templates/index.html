@@ -1,21 +1,349 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Car Purchase Prediction</title>
-</head>
-<body>
-    <h1>Car Purchase Prediction</h1>
-    <form action="/predict" method="POST">
-        <label for="age">Age:</label>
-        <input type="number" name="age" required><br><br>
-        <label for="gender">Gender:</label>
-        <select name="gender" required>
-            <option value="0">Male</option>
-            <option value="1">Female</option>
-        </select><br><br>
-        <label for="salary">Annual Salary ($):</label>
-        <input type="number" name="salary" required><br><br>
-        <input type="submit" value="Predict">
-    </form>
-</body>
+    <head>
+        <title>Car Purchase Prediction</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+        />
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background: #1f1f1f;
+                margin: 0;
+                padding: 0;
+                color: #fff;
+            }
+            
+            .header {
+                background: #333;
+                padding: 20px;
+                text-align: center;
+                font-family: "Montserrat", sans-serif;
+            }
+            
+            .loading-page {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                /* z-index: 9999; */
+            }
+            
+            .loader {
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #3498db;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                /* animation: spin 2s linear infinite; */
+            }
+            
+            /* @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+            
+                100% {
+                    transform: rotate(360deg);
+                }
+            } */
+            
+            .car-icon {
+                font-size: 80px;
+                animation: bounce 1s infinite;
+            }
+            
+            /* @keyframes bounce {
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
+                    transform: translateY(0);
+                }
+            
+                40% {
+                    transform: translateY(-15px);
+                }
+            
+                60% {
+                    transform: translateY(-7px);
+                }
+            } */
+            
+            .quote {
+                text-align: center;
+                font-size: 20px;
+                margin-top: 20px;
+            }
+            
+            .container {
+                display: none;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+                padding: 20px;
+                text-align: center;
+                max-width: 600px;
+                width: 90%;
+                margin: 20px auto;
+                /* animation: jiggle 2s infinite; */
+            }
+            
+            /* @keyframes jiggle {
+                0% {
+                    transform: translateX(0);
+                }
+            
+                20% {
+                    transform: translateX(-10px);
+                }
+            
+                40% {
+                    transform: translateX(10px);
+                }
+            
+                60% {
+                    transform: translateX(-10px);
+                }
+            
+                80% {
+                    transform: translateX(10px);
+                }
+            
+                100% {
+                    transform: translateX(0);
+                }
+            } */
+            
+            h1 {
+                color: #007bff;
+                font-size: 32px;
+                font-family: "Pacifico", cursive;
+                /* animation: bounce 1s infinite; */
+            }
+            
+            /* @keyframes bounce {
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
+                    transform: translateY(0);
+                }
+            
+                40% {
+                    transform: translateY(-15px);
+                }
+            
+                60% {
+                    transform: translateY(-7px);
+                }
+            } */
+            
+            label {
+                display: block;
+                font-weight: bold;
+                margin-top: 10px;
+            }
+            
+            input,
+            select {
+                width: 100%;
+                padding: 10px;
+                margin: 5px 0;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                background: #333;
+                color: #fff;
+            }
+
+            .butt{
+                width: 20px;
+            }
+            
+            input[type="number"] {
+                -webkit-appearance: textfield;
+            }
+            
+            input[type="submit"] {
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                padding: 10px;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+            
+            input[type="submit"]:hover {
+                background-color: #0056b3;
+            }
+            
+            .footer {
+                background: #333;
+                padding: 20px;
+                text-align: center;
+            }
+            
+            .footer table {
+                width: 100%;
+                color: white;
+            }
+            
+            .footer td {
+                text-align: center;
+                padding: 20px;
+            }
+            
+            .footer h3 {
+                color: white;
+                text-decoration: underline;
+            }
+            
+            .bottom-footer {
+                background: #222;
+                padding: 20px;
+                text-align: center;
+                font-weight: bold;
+            }
+            
+            .bottom-footer p {
+                color: white;
+            }
+            
+            .bottom-footer a {
+                text-decoration: none;
+                color: white;
+            }
+            
+            /* Responsive styles */
+            @media (max-width: 768px) {
+                .container {
+                    width: 95%;
+                }
+            }
+            
+            @media (min-width: 769px) and (max-width: 1024px) {
+                .container {
+                    max-width: 80%;
+                }
+            }
+            
+            @media (min-width: 1025px) {
+                .container {
+                    max-width: 900px;
+                }
+            }
+            
+        </style>
+    </head>
+
+    <body>
+        <div class="header">
+            <h1 class="animate__animated animate__bounce">
+                Car Purchase Prediction Model
+            </h1>
+        </div>
+        <div class="loading-page">
+            <i class="car-icon animate__animated animate__bounce">&#128663;</i>
+            <div class="loader"></div>
+            <div class="quote">Loading your car purchase prediction...</div>
+        </div>
+        <div class="container">
+            <h1>Enter Personal Information</h1>
+            <form
+                id="predictionForm"
+                action="/predict"
+                method="POST"
+                class="animate__animated animate__jello"
+            >
+                <table>
+                    <tr>
+                        <td><label for="age">Age:</label></td>
+                        <td>
+                            <input
+                                type="number"
+                                name="age"
+                                id="age"
+                                required
+                                min="0"
+                            />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="gender">Gender:</label></td>
+                        <td>
+                            <select name="gender" id="gender" required>
+                                <option value=1>Male</option>
+                                <option value=0>Female</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="salary">Annual Salary ($):</label></td>
+                        <td>
+                            <input
+                                type="number"
+                                name="salary"
+                                id="salary"
+                                required
+                                min="0"
+                            />
+                        </td>
+                    </tr>
+                </table>
+                <input id="butt" type="submit" value="Predict" />
+            </form>
+        </div>
+        <!-- Footer -->
+        <div class="footer">
+            <table style="width: 100%">
+                <tr>
+                    <td style="width: 70%; text-align: left">
+                        <h3>About Project</h3>
+                        <p>
+                            Creating a K-Nearest Neighbors (KNN) model for car purchase prediction with an accuracy of 91.5%. Utilizing demographic data, age, and income to recommend vehicles, revolutionizing decision-making in the automotive sector.
+                        </p>
+                    </td>
+                    <td style="width: 30%; text-align: left">
+                        <h3>Team Info</h3>
+                        <p>
+                            Team Id: 593155<br />
+                        </p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="bottom-footer">
+            <p>
+                Utkarsh Shukla | Soumya Darshan Sukla | Harsh Agarwal | Nysa
+                Singh
+            </p>
+        </div>
+        <script >
+            // Wait for the document to be fully loaded
+document.addEventListener("DOMContentLoaded", function () {
+    // Set a timeout to hide the loading page after 5 seconds
+    setTimeout(function () {
+        var loadingPage = document.querySelector(".loading-page");
+        var container = document.querySelector(".container");
+
+        if (loadingPage && container) {
+            loadingPage.style.display = "none";
+            container.style.display = "block";
+            document.body.style.overflow = "auto";
+        }
+    }, 1500);
+});
+
+        </script>
+    </body>
 </html>
